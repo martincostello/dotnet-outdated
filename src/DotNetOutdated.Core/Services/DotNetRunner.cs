@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -16,7 +17,7 @@ namespace DotNetOutdated.Core.Services
     {
         public RunStatus Run(string workingDirectory, string[] arguments)
         {
-            var psi = new ProcessStartInfo("dotnet", string.Join(" ", arguments))
+            var psi = new ProcessStartInfo("dotnet", arguments)
             {
                 WorkingDirectory = workingDirectory,
                 UseShellExecute = false,
@@ -34,8 +35,8 @@ namespace DotNetOutdated.Core.Services
                 var output = new StringBuilder();
                 var errors = new StringBuilder();
                 var timeSinceLastOutput = Stopwatch.StartNew();
-                var outputTask = ConsumeStreamReaderAsync(p.StandardOutput, timeSinceLastOutput, output);
-                var errorTask = ConsumeStreamReaderAsync(p.StandardError, timeSinceLastOutput, errors);
+                var outputTask = ConsumeStreamReaderAsync(p.StandardOutput, timeSinceLastOutput, output, false);
+                var errorTask = ConsumeStreamReaderAsync(p.StandardError, timeSinceLastOutput, errors, true);
                 bool processExited = false;
                 const int Timeout = 20000;
 
@@ -47,7 +48,7 @@ namespace DotNetOutdated.Core.Services
 
                     // If output has not been received for a while, then
                     // assume that the process has hung and stop waiting.
-                    lock(timeSinceLastOutput) {
+                    lock (timeSinceLastOutput) {
                         if (timeSinceLastOutput.ElapsedMilliseconds > Timeout) {
                             break;
                         }
@@ -73,7 +74,11 @@ namespace DotNetOutdated.Core.Services
             }
         }
 
-        private static async Task ConsumeStreamReaderAsync(StreamReader reader, Stopwatch timeSinceLastOutput, StringBuilder lines)
+        private static async Task ConsumeStreamReaderAsync(
+            StreamReader reader,
+            Stopwatch timeSinceLastOutput,
+            StringBuilder lines,
+            bool isStdErr)
         {
             await Task.Yield();
 
@@ -85,6 +90,7 @@ namespace DotNetOutdated.Core.Services
                 }
 
                 lines.AppendLine(line);
+                Console.WriteLine($"[std{(isStdErr ? "err" : "out")}] {line}");
             }
         }
     }
