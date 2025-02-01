@@ -26,6 +26,10 @@ namespace DotNetOutdated.Core.Services
                 RedirectStandardError = true
             };
 
+            // HACK See https://github.com/dotnet/msbuild/issues/6753
+            psi.EnvironmentVariables["MSBUILDDISABLENODEREUSE"] = "1";
+            psi.EnvironmentVariables["MSBUILDENSURESTDOUTFORTASKPROCESSES"] = "1";
+
             var p = new Process();
             try
             {
