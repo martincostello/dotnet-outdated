@@ -1,8 +1,8 @@
-﻿using System.IO.Abstractions;
-using System.Text;
-using DotNetOutdated.Core.Exceptions;
+﻿using DotNetOutdated.Core.Exceptions;
 using NuGet.ProjectModel;
-using static System.Net.Mime.MediaTypeNames;
+using System;
+using System.IO.Abstractions;
+using System.Threading.Tasks;
 
 namespace DotNetOutdated.Core.Services
 {
@@ -12,10 +12,16 @@ namespace DotNetOutdated.Core.Services
     /// <remarks>
     /// Credit for the stuff happening in here goes to the https://github.com/jaredcnance/dotnet-status project
     /// </remarks>
-    public sealed class DependencyGraphService(IDotNetRunner dotNetRunner, IFileSystem fileSystem) : IDependencyGraphService
+    public sealed class DependencyGraphService : IDependencyGraphService
     {
-        private readonly IDotNetRunner _dotNetRunner = dotNetRunner;
-        private readonly IFileSystem _fileSystem = fileSystem;
+        private readonly IDotNetRunner _dotNetRunner;
+        private readonly IFileSystem _fileSystem;
+
+        public DependencyGraphService(IDotNetRunner dotNetRunner, IFileSystem fileSystem)
+        {
+            _dotNetRunner = dotNetRunner;
+            _fileSystem = fileSystem;
+        }
 
         public async Task<DependencyGraphSpec> GenerateDependencyGraphAsync(string projectPath, string runtime)
         {
@@ -23,15 +29,13 @@ namespace DotNetOutdated.Core.Services
             string[] arguments =
             [
                 "msbuild",
-                projectPath,
-                "/p:MSBuildTreatWarningsAsErrors=false",
+                $"\"{projectPath}\"",
                 "/p:NoWarn=NU1605",
-                "/p:NuGetAudit=false",
                 "/p:TreatWarningsAsErrors=false",
-                "/p:UseSharedCompilation=false",
                 "/t:Restore,GenerateRestoreGraphFile",
-                $"/p:RestoreGraphOutputPath={dgOutput}",
-                $"/p:RuntimeIdentifiers={runtime}",
+                $"/p:RestoreGraphOutputPath=\"{dgOutput}\"",
+                $"/p:RuntimeIdentifiers=\"{runtime}\""
+
             ];
 
             var runStatus = _dotNetRunner.Run(_fileSystem.Path.GetDirectoryName(projectPath), arguments);
@@ -43,7 +47,7 @@ namespace DotNetOutdated.Core.Services
             }
 
             throw new CommandValidationException($"Unable to process the project `{projectPath}. Are you sure this is a valid .NET Core or .NET Standard project type?" +
-                                                 $"{Environment.NewLine}{Environment.NewLine}Here is the full error message returned from the Microsoft Build Engine:{Environment.NewLine}{Environment.NewLine}{runStatus.Output} - {runStatus.Errors} - exit code: {runStatus.ExitCode}");
+                                                $"{Environment.NewLine}{Environment.NewLine}Here is the full error message returned from the Microsoft Build Engine:{Environment.NewLine}{Environment.NewLine}{runStatus.Output} - {runStatus.Errors} - exit code: {runStatus.ExitCode}");
         }
     }
 }
