@@ -20,8 +20,6 @@ namespace DotNetOutdated.Core.Services
             var psi = new ProcessStartInfo("dotnet", arguments)
             {
                 WorkingDirectory = workingDirectory,
-                UseShellExecute = false,
-                CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
