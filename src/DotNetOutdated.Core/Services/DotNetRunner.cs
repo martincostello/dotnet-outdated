@@ -67,6 +67,8 @@ namespace DotNetOutdated.Core.Services
                     // Ignore
                 }
 
+                cts.Cancel();
+
                 if (!processExited)
                 {
                     p.Kill(entireProcessTree: true);
