@@ -1,9 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace DotNetOutdated.Core.Services
 {
@@ -37,26 +32,39 @@ namespace DotNetOutdated.Core.Services
                 var output = new StringBuilder();
                 var errors = new StringBuilder();
                 var timeSinceLastOutput = Stopwatch.StartNew();
-                var outputTask = ConsumeStreamReaderAsync(p.StandardOutput, timeSinceLastOutput, output, false);
-                var errorTask = ConsumeStreamReaderAsync(p.StandardError, timeSinceLastOutput, errors, true);
+                using var cts = new CancellationTokenSource();
+                var outputTask = ConsumeStreamReaderAsync(p.StandardOutput, timeSinceLastOutput, output, false, cts);
+                var errorTask = ConsumeStreamReaderAsync(p.StandardError, timeSinceLastOutput, errors, true, cts);
                 bool processExited = false;
                 const int Timeout = 60_000;
 
-                while (true) {
-                    if (p.HasExited) {
-                        processExited = true;
-                        break;
-                    }
-
-                    // If output has not been received for a while, then
-                    // assume that the process has hung and stop waiting.
-                    lock (timeSinceLastOutput) {
-                        if (timeSinceLastOutput.ElapsedMilliseconds > Timeout) {
+                try
+                {
+                    while (!cts.IsCancellationRequested)
+                    {
+                        if (p.HasExited)
+                        {
+                            processExited = true;
                             break;
                         }
-                    }
 
-                    Thread.Sleep(100);
+                        // If output has not been received for a while, then
+                        // assume that the process has hung and stop waiting.
+                        lock (timeSinceLastOutput)
+                        {
+                            if (timeSinceLastOutput.ElapsedMilliseconds > Timeout)
+                            {
+                                cts.Cancel();
+                                break;
+                            }
+                        }
+
+                        Thread.Sleep(100);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Ignore
                 }
 
                 if (!processExited)
@@ -80,19 +88,28 @@ namespace DotNetOutdated.Core.Services
             StreamReader reader,
             Stopwatch timeSinceLastOutput,
             StringBuilder lines,
-            bool isStdErr)
+            bool isStdErr,
+            CancellationTokenSource cts)
         {
             await Task.Yield();
 
-            string line;
-            while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+            try
             {
-                lock (timeSinceLastOutput) {
-                    timeSinceLastOutput.Restart();
-                }
+                string line;
+                while ((line = await reader.ReadLineAsync(cts.Token).ConfigureAwait(false)) != null)
+                {
+                    lock (timeSinceLastOutput)
+                    {
+                        timeSinceLastOutput.Restart();
+                    }
 
-                lines.AppendLine(line);
-                Console.WriteLine($"[std{(isStdErr ? "err" : "out")}] {line}");
+                    lines.AppendLine(line);
+                    Console.WriteLine($"[std{(isStdErr ? "err" : "out")}] {line}");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Ignore
             }
         }
     }
