@@ -36,7 +36,7 @@ namespace DotNetOutdated.Core.Services
                 var outputTask = ConsumeStreamReaderAsync(p.StandardOutput, timeSinceLastOutput, output, false, cts);
                 var errorTask = ConsumeStreamReaderAsync(p.StandardError, timeSinceLastOutput, errors, true, cts);
                 bool processExited = false;
-                const int Timeout = 60_000;
+                const int Timeout = 20_000;
 
                 try
                 {
