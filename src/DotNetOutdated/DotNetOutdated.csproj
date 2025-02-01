@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <PackAsTool>true</PackAsTool>
+    <PackAsTool>false</PackAsTool>
     <ToolCommandName>dotnet-outdated</ToolCommandName>
     <AssemblyName>dotnet-outdated</AssemblyName>
     <Authors>dotnet-outdated Team &amp; Contributors</Authors>
@@ -17,8 +17,10 @@
     <PackageVersion>$(VersionSuffix)</PackageVersion>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dotnet-outdated/dotnet-outdated.git</RepositoryUrl>
-    <PackAsTool>true</PackAsTool>
+    <PackAsTool>false</PackAsTool>
     <VersionPrefix>4.5.6</VersionPrefix>
+    <Version>4.5.6</Version>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>
