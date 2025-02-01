@@ -69,7 +69,7 @@ namespace DotNetOutdated.Core.Services
 
                 if (!processExited)
                 {
-                    p.Kill();
+                    p.Kill(entireProcessTree: true);
 
                     return new RunStatus(output.ToString(), errors.ToString(), exitCode: -1);
                 }
