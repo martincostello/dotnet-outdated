@@ -18,6 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dotnet-outdated/dotnet-outdated.git</RepositoryUrl>
     <PackAsTool>true</PackAsTool>
+    <VersionPrefix>4.5.6</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>
