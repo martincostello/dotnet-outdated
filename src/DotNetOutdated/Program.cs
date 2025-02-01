@@ -28,7 +28,7 @@ namespace DotNetOutdated
        Name = "dotnet outdated",
        FullName = "A .NET Core global tool to list outdated Nuget packages.")]
    [VersionOptionFromMember(MemberName = nameof(GetVersion))]
-   internal class Program : CommandBase
+   public class Program : CommandBase
    {
       private readonly IFileSystem _fileSystem;
       private readonly IReporter _reporter;
@@ -446,6 +446,7 @@ namespace DotNetOutdated
 
       private async Task AddOutdatedProjectsIfNeeded(Project project, ConcurrentBag<AnalyzedProject> outdatedProjects)
       {
+         await Task.Yield();
          var outdatedFrameworks = new ConcurrentBag<AnalyzedTargetFramework>();
 
          var tasks = new Task[project.TargetFrameworks.Count];
@@ -465,6 +466,7 @@ namespace DotNetOutdated
 
       private async Task AddOutdatedFrameworkIfNeeded(TargetFramework targetFramework, Project project, ConcurrentBag<AnalyzedTargetFramework> outdatedFrameworks)
       {
+         await Task.Yield();
          var outdatedDependencies = new ConcurrentBag<AnalyzedDependency>();
 
          var deps = targetFramework.Dependencies.Where(d => this.IncludeAutoReferences || !d.IsAutoReferenced);
