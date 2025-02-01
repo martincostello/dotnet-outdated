@@ -39,7 +39,9 @@ namespace DotNetOutdated.Core.Services
 
                 try
                 {
-                    while (true)
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+
+                    while (!cts.Token.CanBeCanceled)
                     {
                         if (p.HasExited)
                         {
