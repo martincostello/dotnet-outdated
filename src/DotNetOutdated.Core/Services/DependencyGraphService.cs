@@ -34,7 +34,7 @@ namespace DotNetOutdated.Core.Services
                 $"/p:RuntimeIdentifiers={runtime}",
                 "-nodeReuse:false",
                 "-verbosity:detailed",
-                "/consoleloggerparameters:ErrorsOnly;WarningsOnly /verbosity:diagnostic"
+                $"-binaryLogger:{Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE") ?? ".", "binlogs", "GenerateDependencyGraph.binlog")}",
             ];
 
             var runStatus = _dotNetRunner.Run(_fileSystem.Path.GetDirectoryName(projectPath), arguments);
