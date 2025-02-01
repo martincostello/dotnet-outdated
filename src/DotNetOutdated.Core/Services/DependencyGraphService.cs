@@ -1,9 +1,6 @@
-﻿using DotNetOutdated.Core.Exceptions;
-using Newtonsoft.Json.Linq;
+﻿using System.IO.Abstractions;
+using DotNetOutdated.Core.Exceptions;
 using NuGet.ProjectModel;
-using System;
-using System.IO.Abstractions;
-using System.Threading.Tasks;
 
 namespace DotNetOutdated.Core.Services
 {
@@ -29,11 +26,10 @@ namespace DotNetOutdated.Core.Services
                 "/p:NoWarn=NU1605",
                 "/p:NuGetAudit=false",
                 "/p:TreatWarningsAsErrors=false",
-                "/p:UseSharedCompilation=false",
+                "/p:UseSharedCompilation =false",
                 "/t:Restore,GenerateRestoreGraphFile",
-                $"/p:RestoreGraphOutputPath=\"{dgOutput}\"",
-                $"/p:RuntimeIdentifiers=\"{runtime}\"",
-                "-binaryLogger:GenerateDependencyGraph.binlog",
+                $"/p:RestoreGraphOutputPath={dgOutput}",
+                $"/p:RuntimeIdentifiers={runtime}",
                 "-nodeReuse:false",
                 "-verbosity:detailed",
             ];

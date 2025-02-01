@@ -32,15 +32,14 @@ namespace DotNetOutdated.Core.Services
                 var output = new StringBuilder();
                 var errors = new StringBuilder();
                 var timeSinceLastOutput = Stopwatch.StartNew();
-                using var cts = new CancellationTokenSource();
-                var outputTask = ConsumeStreamReaderAsync(p.StandardOutput, timeSinceLastOutput, output, false, cts);
-                var errorTask = ConsumeStreamReaderAsync(p.StandardError, timeSinceLastOutput, errors, true, cts);
+                var outputTask = ConsumeStreamReaderAsync(p.StandardOutput, timeSinceLastOutput, output, false);
+                var errorTask = ConsumeStreamReaderAsync(p.StandardError, timeSinceLastOutput, errors, true);
                 bool processExited = false;
                 const int Timeout = 20_000;
 
                 try
                 {
-                    while (!cts.IsCancellationRequested)
+                    while (true)
                     {
                         if (p.HasExited)
                         {
@@ -54,7 +53,6 @@ namespace DotNetOutdated.Core.Services
                         {
                             if (timeSinceLastOutput.ElapsedMilliseconds > Timeout)
                             {
-                                cts.Cancel();
                                 break;
                             }
                         }
@@ -66,8 +64,6 @@ namespace DotNetOutdated.Core.Services
                 {
                     // Ignore
                 }
-
-                cts.Cancel();
 
                 if (!processExited)
                 {
@@ -90,28 +86,20 @@ namespace DotNetOutdated.Core.Services
             StreamReader reader,
             Stopwatch timeSinceLastOutput,
             StringBuilder lines,
-            bool isStdErr,
-            CancellationTokenSource cts)
+            bool isStdErr)
         {
             await Task.Yield();
 
-            try
+            string line;
+            while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
             {
-                string line;
-                while ((line = await reader.ReadLineAsync(cts.Token).ConfigureAwait(false)) != null)
+                lock (timeSinceLastOutput)
                 {
-                    lock (timeSinceLastOutput)
-                    {
-                        timeSinceLastOutput.Restart();
-                    }
-
-                    lines.AppendLine(line);
-                    Console.WriteLine($"[std{(isStdErr ? "err" : "out")}] {line}");
+                    timeSinceLastOutput.Restart();
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                // Ignore
+
+                lines.AppendLine(line);
+                Console.WriteLine($"[std{(isStdErr ? "err" : "out")}] {line}");
             }
         }
     }
