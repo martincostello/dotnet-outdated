@@ -26,6 +26,7 @@ namespace DotNetOutdated.Core.Services
                 projectPath,
                 "/p:MSBuildTreatWarningsAsErrors=false",
                 "/p:NoWarn=NU1605",
+                "/p:NuGetAudit=false",
                 "/p:TreatWarningsAsErrors=false",
                 "/t:Restore,GenerateRestoreGraphFile",
                 $"/p:RestoreGraphOutputPath=\"{dgOutput}\"",
