@@ -1,6 +1,8 @@
 ﻿using System.IO.Abstractions;
+using System.Text;
 using DotNetOutdated.Core.Exceptions;
 using NuGet.ProjectModel;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DotNetOutdated.Core.Services
 {
@@ -32,6 +34,7 @@ namespace DotNetOutdated.Core.Services
                 $"/p:RuntimeIdentifiers={runtime}",
                 "-nodeReuse:false",
                 "-verbosity:detailed",
+                $"-binaryLogger:{Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE") ?? ".", "GenerateDependencyGraph.binlog")}",
             ];
 
             var runStatus = _dotNetRunner.Run(_fileSystem.Path.GetDirectoryName(projectPath), arguments);
