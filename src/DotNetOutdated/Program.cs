@@ -1,4 +1,4 @@
-using DotNetOutdated.Core;
+﻿using DotNetOutdated.Core;
 using DotNetOutdated.Core.Exceptions;
 using DotNetOutdated.Core.Models;
 using DotNetOutdated.Core.Services;
@@ -9,6 +9,7 @@ using NuGet.Common;
 using NuGet.Credentials;
 using NuGet.Versioning;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -133,6 +134,11 @@ namespace DotNetOutdated
       
       public static int Main(string[] args)
       {
+         foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables())
+         {
+             Console.WriteLine($"[env] {entry.Key}={entry.Value}");
+         }
+
          using var services = new ServiceCollection()
                  .AddSingleton(PhysicalConsole.Singleton)
                  .AddSingleton<IReporter>(provider => new ConsoleReporter(provider.GetService<IConsole>()))

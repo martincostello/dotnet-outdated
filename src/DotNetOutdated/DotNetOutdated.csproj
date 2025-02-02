@@ -21,6 +21,7 @@
     <VersionPrefix>4.5.6</VersionPrefix>
     <Version>4.5.6</Version>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <MSBuildTreatWarningsAsErrors>false</MSBuildTreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

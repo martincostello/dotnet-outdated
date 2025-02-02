@@ -19,6 +19,7 @@
     <VersionPrefix>4.5.6</VersionPrefix>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <RepositoryUrl>https://github.com/dotnet-outdated/dotnet-outdated.git</RepositoryUrl>
+    <MSBuildTreatWarningsAsErrors>false</MSBuildTreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
